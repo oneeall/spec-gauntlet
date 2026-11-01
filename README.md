@@ -1,64 +1,47 @@
-# Spec Gauntlet — Uncle Bob's agent workflow, operationalized
+# spec-gauntlet
 
-> **Mission:** keep software fundamentals at the center of AI-assisted development. Humans write the specifications and judge the design; agents write the code; every stage of work must pass a deterministic, machine-checkable gate before it moves on.
->
-> **The spec is the contract — gates, not instructions.**
->
-> For our day-to-day feature work: when a task touches behavior, it goes through the gauntlet. The human contribution moves up one level — from writing code to writing specs and judging design.
+A workflow for building features with AI coding agents, taken from Robert C. Martin's conversation with Matt Pocock about software fundamentals in the age of AI (link at the bottom).
 
-Digest of "LIVE: Uncle Bob on Software Fundamentals in the Age of AI" (Matt Pocock, 56:40) and the development workflow distilled from it, packaged as an installable [ZCode](https://zcode.ai) skill you can use day to day.
+Short version: agents type fast and judge badly. So the human writes the spec, and the machine checks the work. Before any code exists, the requirement gets frozen into Gherkin acceptance tests. From there the work moves through five stages, and each stage ends in a check that a tool runs. If the check fails, you fix it in that stage. You never steer the model with a longer prompt, and you never let a failed stage slide.
 
-**The thesis:** AI agents raise the bar for engineering fundamentals, they don't lower it. When an agent can generate a plausible implementation in seconds, the scarce skill is no longer typing code — it is *judging* it: knowing what a good test suite proves, what a healthy module boundary looks like, and when a design will collapse under change. The discipline from *Clean Code* doesn't become obsolete; it becomes the specification layer that humans contribute.
+The stages:
 
-## The workflow in one screen
+1. **Spec Writer.** Turn the requirement into Gherkin acceptance tests plus a QA script. You read them and confirm they say what you meant. This is the only gate a human closes.
+2. **Coder.** A fresh agent implements the spec function by function, writing unit tests as it goes. Gate: the test suite passes.
+3. **Cleaner.** Check complexity and coverage on the new code. The CRAP score points at code that is both complex and weakly tested, so you know where to refactor. Gate: complexity under control, review comments resolved.
+4. **Hardener.** Mutation testing. Inject small bugs on purpose and confirm the tests catch them. Gate: the mutants die.
+5. **QA.** Run the QA script against the assembled app, end to end. Gate: every step passes.
 
-```
-requirement ──▶ 1 SPEC WRITER ──gate: executable Gherkin + QA script, human confirms
-                     │
-                     ▼ 2 CODER ────────gate: unit tests green
-                     │
-                     ▼ 3 CLEANER ──────gate: complexity capped (CRAP), review resolved
-                     │
-                     ▼ 4 HARDENER ─────gate: mutation tests killed (suite proves itself)
-                     │
-                     ▼ 5 QA ───────────gate: end-to-end pass on the assembled system
-```
-
-Humans write the specs and judge the design; agents write the code; every stage is closed by a deterministic, machine-checkable gate — never by hoping the model followed a long instruction.
+Why not just tell the agent what to do in one long prompt? Two things from the talk. Models quietly ignore instructions buried in the middle of a long prompt, and a single long agent session drifts as junk piles up in its context. Small stages with hard checks beat one big conversation.
 
 ## Install
 
-```bash
-git clone <this-repo> && cd uncle-bob-ai
+```
+git clone https://github.com/oneeall/spec-gauntlet
+cd spec-gauntlet
 ./install.sh
 ```
 
-`install.sh` symlinks the skill into `~/.zcode/skills/` (falling back to a copy), where ZCode discovers it in every project. To uninstall: `rm ~/.zcode/skills/spec-gauntlet`.
+This links the skill into `~/.zcode/skills`, so ZCode finds it in every project. Remove it later with `rm ~/.zcode/skills/spec-gauntlet`.
 
-The skill also works from the repo itself: agents that honor the cross-tool `.agents/skills/` convention pick it up automatically when you work inside this repo. Trigger it by asking for any feature ("add a login screen", "build a CSV exporter"), by saying "use the gauntlet" / "uncle bob workflow", or explicitly with `/spec-gauntlet`.
+The pipeline itself is plain instructions in `.agents/skills/spec-gauntlet/SKILL.md`, so people on other agents can follow it too.
 
-## Repo layout
+## Using it
 
-```
-.agents/skills/spec-gauntlet/
-├── SKILL.md                  # the five-stage pipeline — read this first
-└── references/
-    ├── gates.md              # gate tooling per platform (JVM/Android, JS/TS, Go, Rust, Python)
-    └── templates.md          # Gherkin, QA script, ephemeral stage dispatch prompts
-docs/
-├── gauntlet-workflow.md      # full study digest (vocabulary, timestamps, Q&A positions)
-└── templates/                # copyable spec + QA templates for each feature
-install.sh
-```
+Just ask for a feature the normal way ("add a password reset screen"). The skill drafts the spec first and waits for your confirmation, then runs the remaining stages. You can also call it directly with `/spec-gauntlet`.
 
-## The five working rules (from the episode's close)
+## What's in here
 
-1. **Write specifications, not steering prompts.** Freeze intent into Gherkin acceptance tests; the spec, not the prompt, is the contract.
-2. **Prefer deterministic gates over longer instructions.** Every stage ends in a machine-checkable result — green tests, capped complexity, killed mutants.
-3. **Keep agents ephemeral and single-purpose.** One clean context per task beats one bloated context per project.
-4. **Spend human time on strategy.** Tactical work is cheap to delegate; architecture and system design are the leverage that stays human.
-5. **Treat fundamentals as the job description.** Doing the agent's work manually under strict deterministic constraints is the training path for judgment.
+- `.agents/skills/spec-gauntlet/` — the skill. SKILL.md is the pipeline, `references/` has gate tooling per platform (JVM/Android, JS/TS, Go, Rust, Python) and the templates.
+- `docs/gauntlet-workflow.md` — study notes on the talk, with timestamps.
+- `docs/templates/` — spec and QA templates to copy for each feature.
 
-## Attribution
+## Rules worth remembering
 
-The workflow and rules come from Robert C. Martin ("Uncle Bob") in conversation with Matt Pocock — [youtube.com/watch?v=zcLPGC-tvgk](https://youtube.com/watch?v=zcLPGC-tvgk). This repo is an independent operationalization of those ideas; see [docs/gauntlet-workflow.md](docs/gauntlet-workflow.md) for the full digest with timestamps.
+- Write specs, not steering prompts.
+- Every stage ends in something a machine can check.
+- One clean agent context per task.
+- Architecture decisions stay with people. Typing is cheap now.
+- Doing the agent's job by hand, under strict rules, is how you learn to judge its work.
+
+Source: [LIVE: Uncle Bob on Software Fundamentals in the Age of AI](https://youtube.com/watch?v=zcLPGC-tvgk), Matt Pocock, 56:40.
