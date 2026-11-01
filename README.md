@@ -1,5 +1,11 @@
 # Spec Gauntlet — Uncle Bob's agent workflow, operationalized
 
+> **Mission:** keep software fundamentals at the center of AI-assisted development. Humans write the specifications and judge the design; agents write the code; every stage of work must pass a deterministic, machine-checkable gate before it moves on.
+>
+> **The spec is the contract — gates, not instructions.**
+>
+> For our day-to-day feature work: when a task touches behavior, it goes through the gauntlet. The human contribution moves up one level — from writing code to writing specs and judging design.
+
 Digest of "LIVE: Uncle Bob on Software Fundamentals in the Age of AI" (Matt Pocock, 56:40) and the development workflow distilled from it, packaged as an installable [ZCode](https://zcode.ai) skill you can use day to day.
 
 **The thesis:** AI agents raise the bar for engineering fundamentals, they don't lower it. When an agent can generate a plausible implementation in seconds, the scarce skill is no longer typing code — it is *judging* it: knowing what a good test suite proves, what a healthy module boundary looks like, and when a design will collapse under change. The discipline from *Clean Code* doesn't become obsolete; it becomes the specification layer that humans contribute.
